@@ -2,6 +2,7 @@ import unittest
 import image_blending as ib
 import numpy as np
 import cv2
+from matplotlib import pyplot as plt
 
 
 class ImageBlendingTests(unittest.TestCase):
@@ -40,6 +41,37 @@ class ImageBlendingTests(unittest.TestCase):
         self.assertEqual(np.size(blurred_image, 0), np.size(test_image, 0))
         self.assertEqual(np.size(blurred_image, 1), np.size(test_image, 1))
         self.assertEqual(np.size(blurred_image, 2), np.size(test_image, 2))
+        # For visual debugging
+        # fig = plt.figure(figsize=(10, 10))
+        # fig.add_subplot(2, 2, 1)
+        # plt.imshow(test_image)
+        # fig.add_subplot(2, 2, 2)
+        # plt.imshow(blurred_image)
+        # plt.show()
+
+    def test_1D_separable_gaussian_blurring(self):
+        test_image = cv2.imread('sample_images/im1_1-2.JPG')
+        row_gaussian_kernel = np.array([[1, 2, 1]],
+                                       dtype=np.float32)
+        row_gaussian_kernel = (1 / 4) * row_gaussian_kernel
+        col_gaussian_kernel = row_gaussian_kernel.transpose()
+        print(col_gaussian_kernel)
+        print(row_gaussian_kernel)
+        col_kernel_blurred_image = ib.convolve(test_image, col_gaussian_kernel)
+        self.assertEqual(np.size(col_kernel_blurred_image, 0), np.size(test_image, 0))
+        self.assertEqual(np.size(col_kernel_blurred_image, 1), np.size(test_image, 1))
+        self.assertEqual(np.size(col_kernel_blurred_image, 2), np.size(test_image, 2))
+        blurred_image = ib.convolve(col_kernel_blurred_image, row_gaussian_kernel)
+        self.assertEqual(np.size(blurred_image, 0), np.size(test_image, 0))
+        self.assertEqual(np.size(blurred_image, 1), np.size(test_image, 1))
+        self.assertEqual(np.size(blurred_image, 2), np.size(test_image, 2))
+        # For visual debugging
+        # fig = plt.figure(figsize=(10, 10))
+        # fig.add_subplot(2, 2, 1)
+        # plt.imshow(test_image)
+        # fig.add_subplot(2, 2, 2)
+        # plt.imshow(blurred_image)
+        # plt.show()
 
 
 if __name__ == '__main__':

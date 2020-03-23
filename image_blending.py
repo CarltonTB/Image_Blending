@@ -26,7 +26,6 @@ def convolve(I, H):
     image_height = np.size(I, 0)
     # image width
     image_width = np.size(I, 1)
-    # TODO: add padding so the result is of the same dimensions as the original image
     padding_width = int(math.floor(filter_width-1)/2)
     padding_height = int(math.floor(filter_height-1)/2)
     padded_image = apply_padding(I, padding_height, padding_width)
@@ -92,23 +91,3 @@ def apply_padding(I, padding_height, padding_width):
         result = np.concatenate((result, zero_column), axis=1)
     return result
 
-
-# gaussian_kernel = np.array([[1, 2, 1],
-#                             [2, 4, 2],
-#                             [1, 2, 1]],
-#                            dtype=np.float32)
-#
-# gaussian_kernel = (1 / 16) * gaussian_kernel
-# image = cv2.imread('sample_images/im1_1-2.JPG')
-# new_image = convolve(image, gaussian_kernel)
-# fig = plt.figure(figsize=(10, 10))
-# fig.add_subplot(2, 2, 1)
-# plt.imshow(image)
-# fig.add_subplot(2, 2, 2)
-# plt.imshow(new_image)
-# plt.show()
-
-# cv2.imshow('image', new_image)
-# cv2.imshow('image2', image)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
