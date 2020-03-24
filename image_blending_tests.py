@@ -42,6 +42,9 @@ class ImageBlendingTests(unittest.TestCase):
         self.assertEqual(np.size(blurred_image, 1), np.size(test_image, 1))
         self.assertEqual(np.size(blurred_image, 2), np.size(test_image, 2))
         # For visual debugging
+        # convert from BGR to RGB for display
+        # test_image = cv2.cvtColor(test_image, cv2.COLOR_BGR2RGB)
+        # blurred_image = cv2.cvtColor(blurred_image, cv2.COLOR_BGR2RGB)
         # fig = plt.figure(figsize=(10, 10))
         # fig.add_subplot(2, 2, 1)
         # plt.imshow(test_image)
@@ -66,12 +69,27 @@ class ImageBlendingTests(unittest.TestCase):
         self.assertEqual(np.size(blurred_image, 1), np.size(test_image, 1))
         self.assertEqual(np.size(blurred_image, 2), np.size(test_image, 2))
         # For visual debugging
+        # convert from BGR to RGB for display
+        # test_image = cv2.cvtColor(test_image, cv2.COLOR_BGR2RGB)
+        # blurred_image = cv2.cvtColor(blurred_image, cv2.COLOR_BGR2RGB)
         # fig = plt.figure(figsize=(10, 10))
         # fig.add_subplot(2, 2, 1)
         # plt.imshow(test_image)
         # fig.add_subplot(2, 2, 2)
         # plt.imshow(blurred_image)
         # plt.show()
+
+    def test_reduce(self):
+        test_image = cv2.imread('sample_images/im1_1-2.JPG')
+        smaller_image = ib.reduce(test_image)
+        self.assertEqual(np.size(smaller_image, 0), np.size(test_image, 0)/2)
+        self.assertEqual(np.size(smaller_image, 1), np.size(test_image, 1)/2)
+        self.assertEqual(np.size(smaller_image, 2), np.size(test_image, 2))
+        # For visual debugging
+        # cv2.imshow('original', test_image)
+        # cv2.imshow('reduced', smaller_image)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':

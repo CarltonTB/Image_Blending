@@ -60,7 +60,20 @@ def reduce(I):
     returns:
     a copy of the image down sampled to be half the height and half the width
     """
-    return None
+    # image depth
+    image_channels = np.size(I, 2)
+    # image height
+    image_height = np.size(I, 0)
+    # image width
+    image_width = np.size(I, 1)
+    result_list = []
+    for i in range(0, image_height, 2):
+        new_row_list = []
+        for j in range(0, image_width, 2):
+            new_row_list.append(I[i, j])
+        result_list.append(new_row_list)
+    result = np.array(result_list)
+    return result
 
 
 def apply_padding(I, padding_height, padding_width):
@@ -80,8 +93,6 @@ def apply_padding(I, padding_height, padding_width):
     image_width = np.size(I, 1)
     zero_row = np.array([[[0]*image_channels]*image_width])
     zero_column = np.array([[[0]*image_channels]]*(image_height+padding_height*2))
-    # print(zero_row)
-    # print(zero_column)
     result = np.copy(I)
     for i in range(0, padding_height):
         result = np.concatenate((zero_row, result), axis=0)
