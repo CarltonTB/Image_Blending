@@ -1,3 +1,4 @@
+# Author: Carlton Brady
 import unittest
 import image_blending as ib
 import numpy as np
@@ -5,6 +6,7 @@ import cv2
 from matplotlib import pyplot as plt
 
 
+# tests take about 15-20 seconds to run
 class ImageBlendingTests(unittest.TestCase):
 
     def test_apply_padding(self):
@@ -58,8 +60,6 @@ class ImageBlendingTests(unittest.TestCase):
                                        dtype=np.float32)
         row_gaussian_kernel = (1 / 4) * row_gaussian_kernel
         col_gaussian_kernel = row_gaussian_kernel.transpose()
-        print(col_gaussian_kernel)
-        print(row_gaussian_kernel)
         col_kernel_blurred_image = ib.convolve(test_image, col_gaussian_kernel)
         self.assertEqual(np.size(col_kernel_blurred_image, 0), np.size(test_image, 0))
         self.assertEqual(np.size(col_kernel_blurred_image, 1), np.size(test_image, 1))
@@ -88,6 +88,18 @@ class ImageBlendingTests(unittest.TestCase):
         # For visual debugging
         # cv2.imshow('original', test_image)
         # cv2.imshow('reduced', smaller_image)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+
+    def test_expand(self):
+        test_image = cv2.imread('sample_images/im1_1-2.JPG')
+        larger_image = ib.expand(test_image)
+        self.assertEqual(np.size(larger_image, 0), np.size(test_image, 0)*2)
+        self.assertEqual(np.size(larger_image, 1), np.size(test_image, 1)*2)
+        self.assertEqual(np.size(larger_image, 2), np.size(test_image, 2))
+        # For visual debugging
+        # cv2.imshow('original', test_image)
+        # cv2.imshow('expanded', larger_image)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 

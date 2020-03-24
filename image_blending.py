@@ -60,19 +60,51 @@ def reduce(I):
     returns:
     a copy of the image down sampled to be half the height and half the width
     """
+    row_gaussian_kernel = np.array([[1, 2, 1]],
+                                   dtype=np.float32)
+    row_gaussian_kernel = (1 / 4) * row_gaussian_kernel
+    col_gaussian_kernel = row_gaussian_kernel.transpose()
+    # Blur with the column filter first
+    col_kernel_blurred_image = convolve(I, col_gaussian_kernel)
+    # Blur with the row filter
+    blurred_image = convolve(col_kernel_blurred_image, row_gaussian_kernel)
+    # image height
+    image_height = np.size(blurred_image, 0)
+    # image width
+    image_width = np.size(blurred_image, 1)
+    result_list = []
+    for i in range(0, image_height, 2):
+        new_row_list = []
+        for j in range(0, image_width, 2):
+            new_row_list.append(blurred_image[i, j])
+        result_list.append(new_row_list)
+    result = np.array(result_list)
+    return result.astype(np.uint8)
+
+
+def expand(I):
+    """
+    I is an image of varying size
+    returns:
+    a copy of the image expanded to be twice the size
+    """
     # image depth
     image_channels = np.size(I, 2)
     # image height
     image_height = np.size(I, 0)
     # image width
     image_width = np.size(I, 1)
-    result_list = []
-    for i in range(0, image_height, 2):
-        new_row_list = []
-        for j in range(0, image_width, 2):
-            new_row_list.append(I[i, j])
-        result_list.append(new_row_list)
-    result = np.array(result_list)
+    # create an ndarray of twice the size filled with all zeros, then fill it in
+    result = np.zeros((image_height*2, image_width*2, image_channels), dtype=np.uint8)
+    pr = 0  # expanded pixel row
+    # loop through all the pixels in the image
+    for i in range(0, image_height):
+        pc = 0  # expanded pixel col
+        for j in range(0, image_width):
+            # make a 2x2 square of pixels in the output equal to the current pixel
+            result[pr:pr+2, pc:pc+2] = I[i, j]
+            pc += 2
+        pr += 2
     return result
 
 
@@ -101,4 +133,3 @@ def apply_padding(I, padding_height, padding_width):
         result = np.concatenate((zero_column, result), axis=1)
         result = np.concatenate((result, zero_column), axis=1)
     return result
-
