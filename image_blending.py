@@ -108,6 +108,23 @@ def expand(I):
     return result
 
 
+def gaussian_pyramid(I, n):
+    """
+    I is an image of varying size
+    n is the number of levels in the pyramid
+    return:
+    a list of images in the gaussian pyramid from largest to smallest.
+    each image is a numpy ndarray.
+    """
+    pyramid = []
+    cur_level = np.copy(I)
+    pyramid.append(cur_level)
+    for i in range(0, n):
+        cur_level = reduce(cur_level)
+        pyramid.append(cur_level)
+    return pyramid
+
+
 def apply_padding(I, padding_height, padding_width):
     """
     Helper function that applies zero-padding

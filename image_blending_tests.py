@@ -103,6 +103,25 @@ class ImageBlendingTests(unittest.TestCase):
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
+    def test_gaussian_pyramid(self):
+        test_image = cv2.imread('sample_images/im1_1-2.JPG')
+        pyramid = ib.gaussian_pyramid(test_image, 3)
+        self.assertEqual(np.size(pyramid[0], 0), np.size(test_image, 0))
+        self.assertEqual(np.size(pyramid[0], 1), np.size(test_image, 1))
+        self.assertEqual(np.size(pyramid[0], 2), np.size(test_image, 2))
+        self.assertEqual(np.size(pyramid[1], 0), np.size(test_image, 0)/2)
+        self.assertEqual(np.size(pyramid[1], 1), np.size(test_image, 1)/2)
+        self.assertEqual(np.size(pyramid[1], 2), np.size(test_image, 2))
+        self.assertEqual(np.size(pyramid[2], 0), np.size(test_image, 0)/4)
+        self.assertEqual(np.size(pyramid[2], 1), np.size(test_image, 1)/4)
+        self.assertEqual(np.size(pyramid[2], 2), np.size(test_image, 2))
+        # For visual debugging
+        # cv2.imshow('image1', pyramid[0])
+        # cv2.imshow('image2', pyramid[1])
+        # cv2.imshow('image3', pyramid[2])
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
     unittest.main()
