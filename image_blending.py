@@ -110,19 +110,44 @@ def expand(I):
 
 def gaussian_pyramid(I, n):
     """
+    Creates a Gaussian pyramid of the image with n levels.
     I is an image of varying size
     n is the number of levels in the pyramid
     return:
     a list of images in the gaussian pyramid from largest to smallest.
     each image is a numpy ndarray.
     """
-    pyramid = []
+    g_pyramid = []
     cur_level = np.copy(I)
-    pyramid.append(cur_level)
+    g_pyramid.append(cur_level)
     for i in range(0, n):
         cur_level = reduce(cur_level)
-        pyramid.append(cur_level)
-    return pyramid
+        g_pyramid.append(cur_level)
+    return g_pyramid
+
+
+def laplacian_pyramid(I, n):
+    """
+    Creates a Laplacian pyramid for the image by taking the difference of Gaussians.
+    I is an image of varying size
+    n is the number of levels in the pyramid
+    returns:
+    a list of images in the laplacian pyramid from largest to smallest.
+    each image is a numpy ndarray.
+    """
+    # first create the gaussian pyramid
+    g_pyramid = gaussian_pyramid(I, n)
+    l_pyramid = [None]*n
+    # the smallest levels are the same in each pyramid
+    l_pyramid[n-1] = g_pyramid[n-1]
+    for i in range(0, n-1):
+        expanded_image = expand(g_pyramid[i+1])
+        desired_dimensions = np.shape(g_pyramid[i])
+        # in case the dimensions are off by 1 from rounding
+        if desired_dimensions != np.shape(expanded_image):
+            expanded_image = cv2.resize(expanded_image, dsize=(desired_dimensions[1], desired_dimensions[0]))
+        l_pyramid[i] = g_pyramid[i] - expanded_image
+    return l_pyramid
 
 
 def apply_padding(I, padding_height, padding_width):

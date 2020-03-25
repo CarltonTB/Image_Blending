@@ -105,22 +105,49 @@ class ImageBlendingTests(unittest.TestCase):
 
     def test_gaussian_pyramid(self):
         test_image = cv2.imread('sample_images/im1_1-2.JPG')
-        pyramid = ib.gaussian_pyramid(test_image, 3)
-        self.assertEqual(np.size(pyramid[0], 0), np.size(test_image, 0))
-        self.assertEqual(np.size(pyramid[0], 1), np.size(test_image, 1))
-        self.assertEqual(np.size(pyramid[0], 2), np.size(test_image, 2))
-        self.assertEqual(np.size(pyramid[1], 0), np.size(test_image, 0)/2)
-        self.assertEqual(np.size(pyramid[1], 1), np.size(test_image, 1)/2)
-        self.assertEqual(np.size(pyramid[1], 2), np.size(test_image, 2))
-        self.assertEqual(np.size(pyramid[2], 0), np.size(test_image, 0)/4)
-        self.assertEqual(np.size(pyramid[2], 1), np.size(test_image, 1)/4)
-        self.assertEqual(np.size(pyramid[2], 2), np.size(test_image, 2))
+        g_pyramid = ib.gaussian_pyramid(test_image, 3)
+        self.assertEqual(np.size(g_pyramid[0], 0), np.size(test_image, 0))
+        self.assertEqual(np.size(g_pyramid[0], 1), np.size(test_image, 1))
+        self.assertEqual(np.size(g_pyramid[0], 2), np.size(test_image, 2))
+        self.assertEqual(np.size(g_pyramid[1], 0), np.size(test_image, 0)/2)
+        self.assertEqual(np.size(g_pyramid[1], 1), np.size(test_image, 1)/2)
+        self.assertEqual(np.size(g_pyramid[1], 2), np.size(test_image, 2))
+        self.assertEqual(np.size(g_pyramid[2], 0), np.size(test_image, 0)/4)
+        self.assertEqual(np.size(g_pyramid[2], 1), np.size(test_image, 1)/4)
+        self.assertEqual(np.size(g_pyramid[2], 2), np.size(test_image, 2))
         # For visual debugging
-        # cv2.imshow('image1', pyramid[0])
-        # cv2.imshow('image2', pyramid[1])
-        # cv2.imshow('image3', pyramid[2])
+        # cv2.imshow('image1', g_pyramid[0])
+        # cv2.imshow('image2', g_pyramid[1])
+        # cv2.imshow('image3', g_pyramid[2])
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
+
+    def test_laplacian_pyramid(self):
+        test_image = cv2.imread('sample_images/im1_1-2.JPG')
+        l_pyramid = ib.laplacian_pyramid(test_image, 4)
+        self.assertEqual(np.size(l_pyramid[0], 0), np.size(test_image, 0))
+        self.assertEqual(np.size(l_pyramid[0], 1), np.size(test_image, 1))
+        self.assertEqual(np.size(l_pyramid[0], 2), np.size(test_image, 2))
+        self.assertEqual(round(np.size(l_pyramid[1], 0), 0), round(np.size(test_image, 0)/2, 0))
+        self.assertEqual(round(np.size(l_pyramid[1], 1), 0), round(np.size(test_image, 1)/2, 0))
+        self.assertEqual(np.size(l_pyramid[1], 2), np.size(test_image, 2))
+
+        self.assertEqual(round(np.size(l_pyramid[2], 0), 0), round(np.size(test_image, 0)/4, 0))
+        self.assertEqual(round(np.size(l_pyramid[2], 1), 0), round(np.size(test_image, 1)/4, 0))
+
+        self.assertEqual(np.size(l_pyramid[2], 2), np.size(test_image, 2))
+
+        self.assertEqual(round(np.size(l_pyramid[3], 0), 0), round(np.size(test_image, 0)/8, 0))
+        self.assertEqual(round(np.size(l_pyramid[3], 1), 0), round(np.size(test_image, 1)/8, 0))
+
+        self.assertEqual(np.size(l_pyramid[3], 2), np.size(test_image, 2))
+        # For visual debugging
+        cv2.imshow('image1', l_pyramid[0])
+        cv2.imshow('image2', l_pyramid[1])
+        cv2.imshow('image3', l_pyramid[2])
+        cv2.imshow('image4', l_pyramid[3])
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
