@@ -6,7 +6,7 @@ import cv2
 from matplotlib import pyplot as plt
 
 
-# tests take about 15-20 seconds to run
+# tests take about 40-50 seconds to run
 class ImageBlendingTests(unittest.TestCase):
 
     def test_apply_padding(self):
@@ -37,7 +37,6 @@ class ImageBlendingTests(unittest.TestCase):
                                    [2, 4, 2],
                                    [1, 2, 1]],
                                    dtype=np.float32)
-
         gaussian_kernel = (1 / 16) * gaussian_kernel
         blurred_image = ib.convolve(test_image, gaussian_kernel)
         self.assertEqual(np.size(blurred_image, 0), np.size(test_image, 0))
@@ -131,23 +130,32 @@ class ImageBlendingTests(unittest.TestCase):
         self.assertEqual(round(np.size(l_pyramid[1], 0), 0), round(np.size(test_image, 0)/2, 0))
         self.assertEqual(round(np.size(l_pyramid[1], 1), 0), round(np.size(test_image, 1)/2, 0))
         self.assertEqual(np.size(l_pyramid[1], 2), np.size(test_image, 2))
-
         self.assertEqual(round(np.size(l_pyramid[2], 0), 0), round(np.size(test_image, 0)/4, 0))
         self.assertEqual(round(np.size(l_pyramid[2], 1), 0), round(np.size(test_image, 1)/4, 0))
-
         self.assertEqual(np.size(l_pyramid[2], 2), np.size(test_image, 2))
-
         self.assertEqual(round(np.size(l_pyramid[3], 0), 0), round(np.size(test_image, 0)/8, 0))
         self.assertEqual(round(np.size(l_pyramid[3], 1), 0), round(np.size(test_image, 1)/8, 0))
-
         self.assertEqual(np.size(l_pyramid[3], 2), np.size(test_image, 2))
         # For visual debugging
-        cv2.imshow('image1', l_pyramid[0])
-        cv2.imshow('image2', l_pyramid[1])
-        cv2.imshow('image3', l_pyramid[2])
-        cv2.imshow('image4', l_pyramid[3])
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.imshow('image1', l_pyramid[0])
+        # cv2.imshow('image2', l_pyramid[1])
+        # cv2.imshow('image3', l_pyramid[2])
+        # cv2.imshow('image4', l_pyramid[3])
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+
+    def test_reconstruction(self):
+        test_image = cv2.imread('sample_images/im1_1-2.JPG')
+        l_pyramid = ib.laplacian_pyramid(test_image, 4)
+        reconstructed = ib.reconstruct(l_pyramid, len(l_pyramid))
+        self.assertEqual(np.size(reconstructed, 0), np.size(test_image, 0))
+        self.assertEqual(np.size(reconstructed, 1), np.size(test_image, 1))
+        self.assertEqual(np.size(reconstructed, 2), np.size(test_image, 2))
+        # For visual debugging
+        # cv2.imshow('original', test_image)
+        # cv2.imshow('reconstructed', reconstructed)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':

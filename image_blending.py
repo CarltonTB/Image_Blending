@@ -144,10 +144,49 @@ def laplacian_pyramid(I, n):
         expanded_image = expand(g_pyramid[i+1])
         desired_dimensions = np.shape(g_pyramid[i])
         # in case the dimensions are off by 1 from rounding
-        if desired_dimensions != np.shape(expanded_image):
-            expanded_image = cv2.resize(expanded_image, dsize=(desired_dimensions[1], desired_dimensions[0]))
+        expanded_image = match_dimensions(desired_dimensions, expanded_image)
         l_pyramid[i] = g_pyramid[i] - expanded_image
     return l_pyramid
+
+
+def reconstruct(LI, n):
+    """
+
+    LI is a Laplacian pyramid (a list of numpy ndarray)
+    n is the number of levels in the pyramid
+    returns:
+    The reconstructed image formed by collapsing the given Laplacian pyramid
+    """
+    gaussian_kernel = np.array([[1, 2, 1],
+                                [2, 4, 2],
+                                [1, 2, 1]],
+                               dtype=np.float32)
+    gaussian_kernel = (1 / 16) * gaussian_kernel
+    # loop from the smallest level of the pyramid to the largest
+    reconstructed = LI[n-1]
+    for i in range(n-2, -1, -1):
+        expanded_image = expand(reconstructed)
+        # TODO: figure out if blurring should really be done here!
+        # TODO: calculate the reconstruction error and report it
+        # expanded = convolve(expanded, gaussian_kernel)
+        desired_dimensions = np.shape(LI[i])
+        # in case the dimensions are off by 1 from rounding
+        expanded_image = match_dimensions(desired_dimensions, expanded_image)
+        reconstructed = LI[i] + expanded_image
+    return reconstructed
+
+
+def match_dimensions(desired_dimensions, I):
+    """
+    desired_dimensions is the dimensions that the image I should be
+    I is an image of varying size
+    returns:
+    the resized image I to match the desired dimensions if it didn't already match them
+    """
+    result = I
+    if desired_dimensions != np.shape(I):
+        result = cv2.resize(result, dsize=(desired_dimensions[1], desired_dimensions[0]))
+    return result
 
 
 def apply_padding(I, padding_height, padding_width):
