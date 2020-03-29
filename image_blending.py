@@ -120,7 +120,7 @@ def gaussian_pyramid(I, n):
     g_pyramid = []
     cur_level = np.copy(I)
     g_pyramid.append(cur_level)
-    for i in range(0, n):
+    for i in range(0, n-1):
         cur_level = reduce(cur_level)
         g_pyramid.append(cur_level)
     return g_pyramid
@@ -151,7 +151,6 @@ def laplacian_pyramid(I, n):
 
 def reconstruct(LI, n):
     """
-
     LI is a Laplacian pyramid (a list of numpy ndarray)
     n is the number of levels in the pyramid
     returns:
@@ -174,6 +173,49 @@ def reconstruct(LI, n):
         expanded_image = match_dimensions(desired_dimensions, expanded_image)
         reconstructed = LI[i] + expanded_image
     return reconstructed
+
+
+def blend_images(IA, IB, n):
+    """
+    This function blends two images and returns the resulting image.
+    IA is an image of varying size
+    IB is an image of varying size
+    n is the number of levels in the pyramids used in blending
+    returns:
+    the blended image that results from splining the images together
+    """
+    # TODO: remove hardcoded bitmask blend region dimensions
+    bitmask = create_bitmask(np.size(IA, 0), np.size(IA, 1), np.size(IA, 2), (0, 200), np.size(IA, 0), 200)
+    # Everything should have the same dimensions
+    assert(np.size(IA) == np.size(IB) == np.size(bitmask))
+    # Laplacian pyramid of image 1
+    LA = laplacian_pyramid(IA, n)
+    # Laplacian pyramid of image 2
+    LB = laplacian_pyramid(IB, n)
+    # TODO: figure out if we should blur the bitmask??
+    # Gaussian pyramid of the bitmask
+    GS = gaussian_pyramid(bitmask, n)
+    Lout = [None]*n
+    for i in range(0, n):
+        Lout[i] = GS[i]*LA[i] + (1-GS[i])*LB[i]
+    return Lout
+
+
+def create_bitmask(height, width, depth, anchor_point, blend_region_height, blend_region_width):
+    """
+    height is the height that the bitmask should be
+    width is the width that the bitmask should be
+    depth is the number of channels in the bitmask (3 for color images, 1 for greyscale)
+    anchor_point is the pixel location of the top left hand corner of the region to be blended
+    blend_region_height is the height of the region with 1's
+    blend_region_width is the width of the region with 1's
+    returns:
+    a bitmask of the specific dimensions with 1's filling in the blend region
+    """
+    ones_region = np.ones((blend_region_height, blend_region_width, depth), dtype=np.uint8)
+    bitmask = np.zeros((height, width, depth), dtype=np.uint8)
+    bitmask[anchor_point[0]:anchor_point[0]+blend_region_height, anchor_point[1]:anchor_point[1]+blend_region_width] = ones_region
+    return bitmask
 
 
 def match_dimensions(desired_dimensions, I):
