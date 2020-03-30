@@ -6,7 +6,7 @@ import cv2
 from matplotlib import pyplot as plt
 
 
-# tests take about 70-80 seconds to run
+# tests take about 35-45s seconds to run
 class ImageBlendingTests(unittest.TestCase):
 
     def test_apply_padding(self):
@@ -48,9 +48,9 @@ class ImageBlendingTests(unittest.TestCase):
         # blurred_image = cv2.cvtColor(blurred_image, cv2.COLOR_BGR2RGB)
         # fig = plt.figure(figsize=(10, 10))
         # fig.add_subplot(2, 2, 1)
-        # plt.imshow(test_image)
+        # plt.imshow(test_image.astype(np.uint8))
         # fig.add_subplot(2, 2, 2)
-        # plt.imshow(blurred_image)
+        # plt.imshow(blurred_image.astype(np.uint8))
         # plt.show()
 
     def test_1D_separable_gaussian_blurring(self):
@@ -73,9 +73,9 @@ class ImageBlendingTests(unittest.TestCase):
         # blurred_image = cv2.cvtColor(blurred_image, cv2.COLOR_BGR2RGB)
         # fig = plt.figure(figsize=(10, 10))
         # fig.add_subplot(2, 2, 1)
-        # plt.imshow(test_image)
+        # plt.imshow(test_image.astype(np.uint8))
         # fig.add_subplot(2, 2, 2)
-        # plt.imshow(blurred_image)
+        # plt.imshow(blurred_image.astype(np.uint8))
         # plt.show()
 
     def test_reduce(self):
@@ -85,8 +85,8 @@ class ImageBlendingTests(unittest.TestCase):
         self.assertEqual(np.size(smaller_image, 1), np.size(test_image, 1)/2)
         self.assertEqual(np.size(smaller_image, 2), np.size(test_image, 2))
         # For visual debugging
-        # cv2.imshow('original', test_image)
-        # cv2.imshow('reduced', smaller_image)
+        # cv2.imshow('original', test_image.astype(np.uint8))
+        # cv2.imshow('reduced', smaller_image.astype(np.uint8))
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
@@ -97,8 +97,8 @@ class ImageBlendingTests(unittest.TestCase):
         self.assertEqual(np.size(larger_image, 1), np.size(test_image, 1)*2)
         self.assertEqual(np.size(larger_image, 2), np.size(test_image, 2))
         # For visual debugging
-        # cv2.imshow('original', test_image)
-        # cv2.imshow('expanded', larger_image)
+        # cv2.imshow('original', test_image.astype(np.uint8))
+        # cv2.imshow('expanded', larger_image.astype(np.uint8))
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
@@ -116,9 +116,9 @@ class ImageBlendingTests(unittest.TestCase):
         self.assertEqual(np.size(g_pyramid[2], 1), np.size(test_image, 1)/4)
         self.assertEqual(np.size(g_pyramid[2], 2), np.size(test_image, 2))
         # For visual debugging
-        # cv2.imshow('image1', g_pyramid[0])
-        # cv2.imshow('image2', g_pyramid[1])
-        # cv2.imshow('image3', g_pyramid[2])
+        # cv2.imshow('image1', g_pyramid[0].astype(np.uint8))
+        # cv2.imshow('image2', g_pyramid[1].astype(np.uint8))
+        # cv2.imshow('image3', g_pyramid[2].astype(np.uint8))
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
@@ -138,10 +138,10 @@ class ImageBlendingTests(unittest.TestCase):
         self.assertEqual(round(np.size(l_pyramid[3], 1), 0), round(np.size(test_image, 1)/8, 0))
         self.assertEqual(np.size(l_pyramid[3], 2), np.size(test_image, 2))
         # For visual debugging
-        # cv2.imshow('image1', l_pyramid[0])
-        # cv2.imshow('image2', l_pyramid[1])
-        # cv2.imshow('image3', l_pyramid[2])
-        # cv2.imshow('image4', l_pyramid[3])
+        # cv2.imshow('image1', l_pyramid[0].astype(np.uint8))
+        # cv2.imshow('image2', l_pyramid[1].astype(np.uint8))
+        # cv2.imshow('image3', l_pyramid[2].astype(np.uint8))
+        # cv2.imshow('image4', l_pyramid[3].astype(np.uint8))
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
@@ -153,32 +153,33 @@ class ImageBlendingTests(unittest.TestCase):
         self.assertEqual(np.size(reconstructed, 1), np.size(test_image, 1))
         self.assertEqual(np.size(reconstructed, 2), np.size(test_image, 2))
         # For visual debugging
-        # cv2.imshow('original', test_image)
-        # cv2.imshow('reconstructed', reconstructed)
+        # cv2.imshow('original', test_image.astype(np.uint8))
+        # cv2.imshow('reconstructed', reconstructed.astype(np.uint8))
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
     def test_create_bitmask(self):
         test_image = cv2.imread('sample_images/im1_1-2.JPG')
-        bitmask = ib.create_bitmask(np.size(test_image, 0), np.size(test_image, 1), np.size(test_image, 2), (0, 0), 100, 100)
+        bitmask = ib.create_bitmask(np.size(test_image, 0), np.size(test_image, 1), np.size(test_image, 2), (0, 0), np.size(test_image, 0), 200)
         self.assertEqual(np.size(bitmask, 0), np.size(test_image, 0))
         self.assertEqual(np.size(bitmask, 1), np.size(test_image, 1))
         self.assertEqual(np.size(bitmask, 2), np.size(test_image, 2))
         # For visual debugging
-        # cv2.imshow('bitmask', bitmask)
+        # cv2.imshow('bitmask', bitmask.astype(np.uint8))
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
     def test_blend_images(self):
         test_image_A = cv2.imread('sample_images/im1_1-2.JPG')
         test_image_B = cv2.imread('sample_images/im1_2-1.JPG')
-        blended_pyramid = ib.blend_images(test_image_A, test_image_B, 4)
+        blended_pyramid = ib.blend_images(test_image_B, test_image_A, 4)
         type_example = type(np.ones((1, 1, 3)))
         self.assertEqual(np.size(blended_pyramid, 0), 4)
         self.assertEqual(type(blended_pyramid[0]), type_example)
         self.assertEqual(type(blended_pyramid[1]), type_example)
         self.assertEqual(type(blended_pyramid[2]), type_example)
-        self.assertEqual(type(blended_pyramid[3]), type_example)
+        # self.assertEqual(type(blended_pyramid[3]), type_example)
+        # self.assertEqual(type(blended_pyramid[4]), type_example)
         blended_image = ib.reconstruct(blended_pyramid, 4)
         self.assertEqual(np.size(blended_image, 0), np.size(test_image_A, 0))
         self.assertEqual(np.size(blended_image, 1), np.size(test_image_A, 1))
@@ -186,12 +187,12 @@ class ImageBlendingTests(unittest.TestCase):
         self.assertEqual(np.size(blended_image, 0), np.size(test_image_B, 0))
         self.assertEqual(np.size(blended_image, 1), np.size(test_image_B, 1))
         self.assertEqual(np.size(blended_image, 2), np.size(test_image_B, 2))
-        # # For visual debugging
-        # cv2.imshow('image A', test_image_A)
-        # cv2.imshow('image B', test_image_B)
-        # cv2.imshow('blended', blended_image)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
+        # For visual debugging
+        cv2.imshow('image A', test_image_A.astype(np.uint8))
+        cv2.imshow('image B', test_image_B.astype(np.uint8))
+        cv2.imshow('blended', blended_image.astype(np.uint8))
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':

@@ -4,6 +4,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 import math
 
+# Note: This code deals with everything as datatype np.float32 while doing any operations
+# images are converted to np.uint8 before being passed to the opencv imshow function
+
 
 def convolve(I, H):
     """
@@ -44,13 +47,13 @@ def convolve(I, H):
             for k in range(0, image_channels):
                 image_slice = padded_image[i:i+filter_height, j:j+filter_width, k]
                 dot_product = np.sum(H*image_slice)
-                dot_product = int(round(dot_product, 0))
+                # dot_product = int(round(dot_product, 0))
                 new_channel_list.append(dot_product)
                 # print(image_slice)
             new_row_list.append(new_channel_list)
         result_list.append(new_row_list)
     result = np.array(result_list)
-    return result.astype(np.uint8)
+    return result
 
 
 def reduce(I):
@@ -60,14 +63,19 @@ def reduce(I):
     returns:
     a copy of the image down sampled to be half the height and half the width
     """
-    row_gaussian_kernel = np.array([[1, 2, 1]],
-                                   dtype=np.float32)
-    row_gaussian_kernel = (1 / 4) * row_gaussian_kernel
-    col_gaussian_kernel = row_gaussian_kernel.transpose()
+    # Using the 2D kernel since it runs faster
+    gaussian_kernel = np.array([[1, 2, 1],
+                                [2, 4, 2],
+                                [1, 2, 1]],
+                               dtype=np.float32)
+    gaussian_kernel = (1 / 16) * gaussian_kernel
+    # row_gaussian_kernel = np.array([[1, 2, 1]],
+    #                                dtype=np.float32)
+    # row_gaussian_kernel = (1 / 4) * row_gaussian_kernel
+    # col_gaussian_kernel = row_gaussian_kernel.transpose()
     # Blur with the column filter first
-    col_kernel_blurred_image = convolve(I, col_gaussian_kernel)
-    # Blur with the row filter
-    blurred_image = convolve(col_kernel_blurred_image, row_gaussian_kernel)
+    # col_kernel_blurred_image = convolve(I, col_gaussian_kernel)
+    blurred_image = convolve(I, gaussian_kernel)
     # image height
     image_height = np.size(blurred_image, 0)
     # image width
@@ -79,7 +87,7 @@ def reduce(I):
             new_row_list.append(blurred_image[i, j])
         result_list.append(new_row_list)
     result = np.array(result_list)
-    return result.astype(np.uint8)
+    return result
 
 
 def expand(I):
@@ -95,7 +103,7 @@ def expand(I):
     # image width
     image_width = np.size(I, 1)
     # create an ndarray of twice the size filled with all zeros, then fill it in
-    result = np.zeros((image_height*2, image_width*2, image_channels), dtype=np.uint8)
+    result = np.zeros((image_height*2, image_width*2, image_channels), dtype=np.float32)
     pr = 0  # expanded pixel row
     # loop through all the pixels in the image
     for i in range(0, image_height):
@@ -156,18 +164,11 @@ def reconstruct(LI, n):
     returns:
     The reconstructed image formed by collapsing the given Laplacian pyramid
     """
-    gaussian_kernel = np.array([[1, 2, 1],
-                                [2, 4, 2],
-                                [1, 2, 1]],
-                               dtype=np.float32)
-    gaussian_kernel = (1 / 16) * gaussian_kernel
     # loop from the smallest level of the pyramid to the largest
     reconstructed = LI[n-1]
     for i in range(n-2, -1, -1):
         expanded_image = expand(reconstructed)
-        # TODO: figure out if blurring should really be done here!
-        # TODO: calculate the reconstruction error and report it
-        # expanded = convolve(expanded, gaussian_kernel)
+        # TODO: calculate the reconstruction error and report it! as a single absolute value or matrix
         desired_dimensions = np.shape(LI[i])
         # in case the dimensions are off by 1 from rounding
         expanded_image = match_dimensions(desired_dimensions, expanded_image)
@@ -192,8 +193,8 @@ def blend_images(IA, IB, n):
     LA = laplacian_pyramid(IA, n)
     # Laplacian pyramid of image 2
     LB = laplacian_pyramid(IB, n)
-    # TODO: figure out if we should blur the bitmask??
     # Gaussian pyramid of the bitmask
+    # TODO: allow user to select only x coordinate from which to form blending regions
     GS = gaussian_pyramid(bitmask, n)
     Lout = [None]*n
     for i in range(0, n):
@@ -212,8 +213,8 @@ def create_bitmask(height, width, depth, anchor_point, blend_region_height, blen
     returns:
     a bitmask of the specific dimensions with 1's filling in the blend region
     """
-    ones_region = np.ones((blend_region_height, blend_region_width, depth), dtype=np.uint8)
-    bitmask = np.zeros((height, width, depth), dtype=np.uint8)
+    ones_region = np.ones((blend_region_height, blend_region_width, depth), dtype=np.float32)
+    bitmask = np.zeros((height, width, depth), dtype=np.float32)
     bitmask[anchor_point[0]:anchor_point[0]+blend_region_height, anchor_point[1]:anchor_point[1]+blend_region_width] = ones_region
     return bitmask
 
@@ -246,8 +247,8 @@ def apply_padding(I, padding_height, padding_width):
     image_height = np.size(I, 0)
     # image width
     image_width = np.size(I, 1)
-    zero_row = np.array([[[0]*image_channels]*image_width])
-    zero_column = np.array([[[0]*image_channels]]*(image_height+padding_height*2))
+    zero_row = np.array([[[0]*image_channels]*image_width], dtype=np.float32)
+    zero_column = np.array([[[0]*image_channels]]*(image_height+padding_height*2), dtype=np.float32)
     result = np.copy(I)
     for i in range(0, padding_height):
         result = np.concatenate((zero_row, result), axis=0)
