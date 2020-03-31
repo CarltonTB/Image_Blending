@@ -47,9 +47,7 @@ def convolve(I, H):
             for k in range(0, image_channels):
                 image_slice = padded_image[i:i+filter_height, j:j+filter_width, k]
                 dot_product = np.sum(H*image_slice)
-                # dot_product = int(round(dot_product, 0))
                 new_channel_list.append(dot_product)
-                # print(image_slice)
             new_row_list.append(new_channel_list)
         result_list.append(new_row_list)
     result = np.array(result_list)
@@ -96,24 +94,27 @@ def expand(I):
     returns:
     a copy of the image expanded to be twice the size
     """
-    # image depth
-    image_channels = np.size(I, 2)
-    # image height
-    image_height = np.size(I, 0)
-    # image width
-    image_width = np.size(I, 1)
-    # create an ndarray of twice the size filled with all zeros, then fill it in
-    result = np.zeros((image_height*2, image_width*2, image_channels), dtype=np.float32)
-    pr = 0  # expanded pixel row
-    # loop through all the pixels in the image
-    for i in range(0, image_height):
-        pc = 0  # expanded pixel col
-        for j in range(0, image_width):
-            # make a 2x2 square of pixels in the output equal to the current pixel
-            result[pr:pr+2, pc:pc+2] = I[i, j]
-            pc += 2
-        pr += 2
-    return result
+    # # image depth
+    # image_channels = np.size(I, 2)
+    # # image height
+    # image_height = np.size(I, 0)
+    # # image width
+    # image_width = np.size(I, 1)
+    # # create an ndarray of twice the size filled with all zeros, then fill it in
+    # result = np.zeros((image_height*2, image_width*2, image_channels), dtype=np.float32)
+    # pr = 0  # expanded pixel row
+    # # loop through all the pixels in the image
+    # for i in range(0, image_height):
+    #     pc = 0  # expanded pixel col
+    #     for j in range(0, image_width):
+    #         # make a 2x2 square of pixels in the output equal to the current pixel
+    #         result[pr:pr+2, pc:pc+2] = I[i, j]
+    #         pc += 2
+    #     pr += 2
+    result = np.copy(I)
+    new_width = np.size(result, 1)*2
+    new_height = np.size(result, 0)*2
+    return cv2.resize(result, dsize=(new_width, new_height))
 
 
 def gaussian_pyramid(I, n):
@@ -157,22 +158,23 @@ def laplacian_pyramid(I, n):
     return l_pyramid
 
 
-def reconstruct(LI, n):
+def reconstruct(LI):
     """
     LI is a Laplacian pyramid (a list of numpy ndarray)
-    n is the number of levels in the pyramid
     returns:
     The reconstructed image formed by collapsing the given Laplacian pyramid
     """
     # loop from the smallest level of the pyramid to the largest
+    n = len(LI)
     reconstructed = LI[n-1]
     for i in range(n-2, -1, -1):
+        desired_dimensions = np.shape(LI[i])
         expanded_image = expand(reconstructed)
         # TODO: calculate the reconstruction error and report it! as a single absolute value or matrix
-        desired_dimensions = np.shape(LI[i])
         # in case the dimensions are off by 1 from rounding
         expanded_image = match_dimensions(desired_dimensions, expanded_image)
         reconstructed = LI[i] + expanded_image
+    reconstructed = np.rint(reconstructed)
     return reconstructed
 
 
@@ -186,7 +188,8 @@ def blend_images(IA, IB, n):
     the blended image that results from splining the images together
     """
     # TODO: remove hardcoded bitmask blend region dimensions
-    bitmask = create_bitmask(np.size(IA, 0), np.size(IA, 1), np.size(IA, 2), (0, 200), np.size(IA, 0), 200)
+    bitmask = create_bitmask(np.size(IA, 0), np.size(IA, 1), np.size(IA, 2), (0, int(np.size(IA, 1)/2)),
+                             np.size(IA, 0), int(np.size(IA, 1)/2))
     # Everything should have the same dimensions
     assert(np.size(IA) == np.size(IB) == np.size(bitmask))
     # Laplacian pyramid of image 1
@@ -198,7 +201,15 @@ def blend_images(IA, IB, n):
     GS = gaussian_pyramid(bitmask, n)
     Lout = [None]*n
     for i in range(0, n):
-        Lout[i] = GS[i]*LA[i] + (1-GS[i])*LB[i]
+        # For visual debugging
+        # left_half = GS[i] * LA[i]
+        # right_half = (1.0-GS[i])*LB[i]
+        # cv2.imshow("bitmask", np.rint(255*GS[i]).astype(np.uint8))
+        # cv2.imshow("left", left_half.astype(np.uint8))
+        # cv2.imshow("right", right_half.astype(np.uint8))
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        Lout[i] = GS[i]*LA[i] + (1.0-GS[i])*LB[i]
     return Lout
 
 

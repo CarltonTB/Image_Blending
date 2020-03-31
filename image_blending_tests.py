@@ -6,7 +6,7 @@ import cv2
 from matplotlib import pyplot as plt
 
 
-# tests take about 35-45s seconds to run
+# tests take about 40-50s seconds to run
 class ImageBlendingTests(unittest.TestCase):
 
     def test_apply_padding(self):
@@ -123,7 +123,7 @@ class ImageBlendingTests(unittest.TestCase):
         # cv2.destroyAllWindows()
 
     def test_laplacian_pyramid(self):
-        test_image = cv2.imread('sample_images/im1_1-2.JPG')
+        test_image = cv2.imread('sample_images/apple.jpg')
         l_pyramid = ib.laplacian_pyramid(test_image, 4)
         self.assertEqual(np.size(l_pyramid[0], 0), np.size(test_image, 0))
         self.assertEqual(np.size(l_pyramid[0], 1), np.size(test_image, 1))
@@ -148,7 +148,7 @@ class ImageBlendingTests(unittest.TestCase):
     def test_reconstruction(self):
         test_image = cv2.imread('sample_images/im1_1-2.JPG')
         l_pyramid = ib.laplacian_pyramid(test_image, 4)
-        reconstructed = ib.reconstruct(l_pyramid, len(l_pyramid))
+        reconstructed = ib.reconstruct(l_pyramid)
         self.assertEqual(np.size(reconstructed, 0), np.size(test_image, 0))
         self.assertEqual(np.size(reconstructed, 1), np.size(test_image, 1))
         self.assertEqual(np.size(reconstructed, 2), np.size(test_image, 2))
@@ -160,27 +160,27 @@ class ImageBlendingTests(unittest.TestCase):
 
     def test_create_bitmask(self):
         test_image = cv2.imread('sample_images/im1_1-2.JPG')
-        bitmask = ib.create_bitmask(np.size(test_image, 0), np.size(test_image, 1), np.size(test_image, 2), (0, 0), np.size(test_image, 0), 200)
+        bitmask = ib.create_bitmask(np.size(test_image, 0), np.size(test_image, 1), np.size(test_image, 2),
+                                    (0, 0), np.size(test_image, 0), int(np.size(test_image, 1)/2))
         self.assertEqual(np.size(bitmask, 0), np.size(test_image, 0))
         self.assertEqual(np.size(bitmask, 1), np.size(test_image, 1))
         self.assertEqual(np.size(bitmask, 2), np.size(test_image, 2))
         # For visual debugging
-        # cv2.imshow('bitmask', bitmask.astype(np.uint8))
+        # bitmask = 255*bitmask
+        # cv2.imshow("mask", bitmask.astype(np.uint8))
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
     def test_blend_images(self):
-        test_image_A = cv2.imread('sample_images/im1_1-2.JPG')
-        test_image_B = cv2.imread('sample_images/im1_2-1.JPG')
+        test_image_A = cv2.imread('sample_images/apple.JPG')
+        test_image_B = cv2.imread('sample_images/orange.JPG')
         blended_pyramid = ib.blend_images(test_image_B, test_image_A, 4)
         type_example = type(np.ones((1, 1, 3)))
-        self.assertEqual(np.size(blended_pyramid, 0), 4)
         self.assertEqual(type(blended_pyramid[0]), type_example)
         self.assertEqual(type(blended_pyramid[1]), type_example)
         self.assertEqual(type(blended_pyramid[2]), type_example)
-        # self.assertEqual(type(blended_pyramid[3]), type_example)
-        # self.assertEqual(type(blended_pyramid[4]), type_example)
-        blended_image = ib.reconstruct(blended_pyramid, 4)
+        self.assertEqual(type(blended_pyramid[3]), type_example)
+        blended_image = ib.reconstruct(blended_pyramid)
         self.assertEqual(np.size(blended_image, 0), np.size(test_image_A, 0))
         self.assertEqual(np.size(blended_image, 1), np.size(test_image_A, 1))
         self.assertEqual(np.size(blended_image, 2), np.size(test_image_A, 2))
@@ -188,11 +188,11 @@ class ImageBlendingTests(unittest.TestCase):
         self.assertEqual(np.size(blended_image, 1), np.size(test_image_B, 1))
         self.assertEqual(np.size(blended_image, 2), np.size(test_image_B, 2))
         # For visual debugging
-        cv2.imshow('image A', test_image_A.astype(np.uint8))
-        cv2.imshow('image B', test_image_B.astype(np.uint8))
-        cv2.imshow('blended', blended_image.astype(np.uint8))
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.imshow('image A', test_image_A.astype(np.uint8))
+        # cv2.imshow('image B', test_image_B.astype(np.uint8))
+        # cv2.imshow('blended', blended_image.astype(np.uint8))
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
