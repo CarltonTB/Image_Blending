@@ -174,7 +174,9 @@ class ImageBlendingTests(unittest.TestCase):
     def test_blend_images(self):
         test_image_A = cv2.imread('sample_images/apple.JPG')
         test_image_B = cv2.imread('sample_images/orange.JPG')
-        blended_pyramid = ib.blend_images(test_image_B, test_image_A, 4)
+        bitmask = ib.create_bitmask(np.size(test_image_B, 0), np.size(test_image_B, 1), np.size(test_image_B, 2), (0, int(np.size(test_image_B, 1) / 2)),
+                                 np.size(test_image_B, 0), int(np.size(test_image_B, 1) / 2))
+        blended_pyramid = ib.create_blended_pyramid(test_image_B, test_image_A, bitmask, 4)
         type_example = type(np.ones((1, 1, 3)))
         self.assertEqual(type(blended_pyramid[0]), type_example)
         self.assertEqual(type(blended_pyramid[1]), type_example)

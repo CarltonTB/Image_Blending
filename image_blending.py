@@ -7,6 +7,8 @@ import math
 # Note: This code deals with everything as datatype np.float32 while doing any operations
 # images are converted to np.uint8 before being passed to the opencv imshow function
 
+# TODO: make blending work for just an overlapping region selected by mouse
+
 
 def convolve(I, H):
     """
@@ -178,7 +180,7 @@ def reconstruct(LI):
     return reconstructed
 
 
-def blend_images(IA, IB, n):
+def create_blended_pyramid(IA, IB, bitmask, n):
     """
     This function blends two images and returns the resulting image.
     IA is an image of varying size
@@ -187,9 +189,6 @@ def blend_images(IA, IB, n):
     returns:
     the blended image that results from splining the images together
     """
-    # TODO: remove hardcoded bitmask blend region dimensions
-    bitmask = create_bitmask(np.size(IA, 0), np.size(IA, 1), np.size(IA, 2), (0, int(np.size(IA, 1)/2)),
-                             np.size(IA, 0), int(np.size(IA, 1)/2))
     # Everything should have the same dimensions
     assert(np.size(IA) == np.size(IB) == np.size(bitmask))
     # Laplacian pyramid of image 1
@@ -211,6 +210,22 @@ def blend_images(IA, IB, n):
         # cv2.destroyAllWindows()
         Lout[i] = GS[i]*LA[i] + (1.0-GS[i])*LB[i]
     return Lout
+
+
+def blend_images(IA, IB, bitmask, n):
+    """
+    This function blends 2 images using Laplacian pyramid blending
+    with n levels
+    IA is an image of varying size
+    IB is an image of varying size
+    bitmask is the bitmask to use in blending
+    n is the number of pyramid levels to use
+    returns:
+    The blended image result
+    """
+    blended_pyramid = create_blended_pyramid(IA, IB, bitmask, n)
+    blended_image = reconstruct(blended_pyramid)
+    return blended_image.astype(np.uint8)
 
 
 def create_bitmask(height, width, depth, anchor_point, blend_region_height, blend_region_width):
