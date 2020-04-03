@@ -172,7 +172,6 @@ def reconstruct(LI):
     for i in range(n-2, -1, -1):
         desired_dimensions = np.shape(LI[i])
         expanded_image = expand(reconstructed)
-        # TODO: calculate the reconstruction error and report it! as a single absolute value or matrix
         # in case the dimensions are off by 1 from rounding
         expanded_image = match_dimensions(desired_dimensions, expanded_image)
         reconstructed = LI[i] + expanded_image
@@ -258,13 +257,13 @@ def match_dimensions(desired_dimensions, I):
     return result
 
 
-def apply_padding(I, padding_height, padding_width):
+def apply_padding(I, padding_height, padding_width, apply_left=True, apply_right=True):
     """
     Helper function that applies zero-padding
     I is an image of varying size
     padding_height is the thickness of the padding to be adding on top and bottom
     padding_width is the thickness of the padding to be added on left and right
-    returns;
+    returns:
     A new image (numpy ndarray) with the added zero-padding
     """
     # image depth
@@ -280,6 +279,8 @@ def apply_padding(I, padding_height, padding_width):
         result = np.concatenate((zero_row, result), axis=0)
         result = np.concatenate((result, zero_row), axis=0)
     for j in range(0, padding_width):
-        result = np.concatenate((zero_column, result), axis=1)
-        result = np.concatenate((result, zero_column), axis=1)
+        if apply_left:
+            result = np.concatenate((zero_column, result), axis=1)
+        if apply_right:
+            result = np.concatenate((result, zero_column), axis=1)
     return result

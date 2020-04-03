@@ -94,6 +94,28 @@ class ImageBlendingDemo:
         cv2.destroyAllWindows()
         print("Demo Complete")
 
+    def run_reconstruction_demo(self):
+        original_image = cv2.imread('sample_images/im1_1-2.JPG')
+        levels = input("Enter the number of Laplacian pyramid levels you want (3-10 ideally)\n")
+        levels = int(levels)
+        print("Creating Laplacian pyramid...")
+        l_pyramid = ib.laplacian_pyramid(original_image, levels)
+        print("Laplacian pyramid complete!")
+        reconstructed = ib.reconstruct(l_pyramid)
+        cv2.imshow("original", original_image)
+        cv2.imshow("reconstructed", np.rint(reconstructed).astype(np.uint8))
+        # Reconstruction error
+        # TODO: figure out why this is zero
+        oi = original_image.astype(np.float32)
+        rec = reconstructed.astype(np.float32)
+        print(oi-rec)
+        total_reconstruction_error = np.sum(((oi-rec)**2)**(1/2))
+        print("Total reconstruction error: " + str(total_reconstruction_error))
+        print("Click on either image and press any key to close the images and end the demo")
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        print("Demo Complete")
+
 
 if __name__ == "__main__":
     demoObj = ImageBlendingDemo()
@@ -109,4 +131,4 @@ if __name__ == "__main__":
     elif choice == "3":
         demoObj.run_laplacian_pyramid_demo()
     elif choice == "4":
-        print(4)
+        demoObj.run_reconstruction_demo()
