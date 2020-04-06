@@ -6,3 +6,8 @@ Dependencies:
 -matplotlib  
 -numpy  
 
+Part 1 results are in the folder called "blending_results"  
+
+Part 2 results are in the folder called "mosaic_results"  
+
+

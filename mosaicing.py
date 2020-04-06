@@ -55,12 +55,72 @@ def select_control_points(imageA, imageB, num_pairs):
     plt.imshow(imageA)
     fig.add_subplot(2, 2, 2)
     plt.imshow(imageB)
-    points = plt.ginput(num_pairs*2)
+    points = plt.ginput(num_pairs*2, timeout=5*60)
     pairs = []
     for i in range(0, len(points)-1, 2):
         pair = (points[i], points[i+1])
         pairs.append(pair)
     return pairs
+
+
+def compute_affine_parameters(I1, I2, point_pairs):
+    """
+    I1 is an image of varying size
+    I2 is an image of varying size
+    point_pairs is a list of corresponding points between the images in the form:
+    [((I1x, I1y), (I2x, I2y)), ((I1x, I1y), (I2x, I2y))...]
+    returns:
+    The affine transformation parameters that would warp image I2 into the same view as image I1
+    """
+    n = len(point_pairs)
+    A = np.zeros((2*n, 6))
+    j = 0
+    for i in range(0, n*2, 2):
+        A[i, 0] = point_pairs[j][1][0]
+        A[i, 1] = point_pairs[j][1][1]
+        A[i, 4] = 1
+        A[i+1, 2] = point_pairs[j][1][0]
+        A[i+1, 3] = point_pairs[j][1][1]
+        A[i+1, 5] = 1
+        j += 1
+    b = np.zeros((2*n, 1))
+    j = 0
+    for k in range(0, n*2, 2):
+        b[k, 0] = point_pairs[j][0][0]
+        b[k+1, 0] = point_pairs[j][0][1]
+        j += 1
+    # for i in range(0, n*2, 2):
+    #     A[i, 0] = point_pairs[j][0][0]
+    #     A[i, 1] = point_pairs[j][0][1]
+    #     A[i, 4] = 1
+    #     A[i+1, 2] = point_pairs[j][0][0]
+    #     A[i+1, 3] = point_pairs[j][0][1]
+    #     A[i+1, 5] = 1
+    #     j += 1
+    # b = np.zeros((2*n, 1))
+    # j = 0
+    # for k in range(0, n*2, 2):
+    #     b[k, 0] = point_pairs[j][1][0]
+    #     b[k+1, 0] = point_pairs[j][1][1]
+    #     j += 1
+    # if A is square, we can just do the regular inverse A^-1 * b
+    if np.size(A, 0) == np.size(A, 1):
+        x = np.matmul(np.linalg.inv(A), b)
+    # solve it using the pseudo inverse
+    else:
+        AT = A.transpose()
+        ATA = np.matmul(AT, A)
+        ATA_inv = np.linalg.inv(ATA)
+        psuedo_inv = np.matmul(ATA_inv, A.transpose())
+        x = np.matmul(psuedo_inv, b)
+    transformation_matrix = np.zeros((2, 3))
+    transformation_matrix[0, 0] = x[0, 0]
+    transformation_matrix[0, 1] = x[1, 0]
+    transformation_matrix[0, 2] = x[4, 0]
+    transformation_matrix[1, 0] = x[2, 0]
+    transformation_matrix[1, 1] = x[3, 0]
+    transformation_matrix[1, 2] = x[5, 0]
+    return transformation_matrix
 
 
 def create_mosaic_bitmask(height, width, depth, ones_anchor_point, ones_region_width,

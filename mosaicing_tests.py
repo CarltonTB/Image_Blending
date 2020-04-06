@@ -39,6 +39,37 @@ class MosaicingTests(unittest.TestCase):
         # pairs = mos.select_control_points(imageA, imageB, 2)
         # self.assertEqual(len(pairs), 2)
 
+    def test_compute_affine_parameters(self):
+        imageA = cv2.imread("sample_images/mountain_A.jpg")
+        imageB = cv2.imread("sample_images/mountain_B.jpg")
+        pairs = mos.select_control_points(imageA, imageB, 3)
+        a = mos.compute_affine_parameters(imageA, imageB, pairs)
+        print(a)
+
+    def test_apply_affine_transformation(self):
+        imageA = cv2.imread("sample_images/mountain_A.jpg")
+        imageB = cv2.imread("sample_images/mountain_B.jpg")
+        # imageA = cv2.resize(imageA, dsize=(np.size(imageA, 1)*2, np.size(imageA, 0)*2))
+        # imageB = cv2.resize(imageB, dsize=(np.size(imageB, 1)*2, np.size(imageB, 0)*2))
+        pairs = mos.select_control_points(imageA, imageB, 3)
+        ptsA = []
+        ptsB = []
+        for i in range(0, len(pairs)):
+            ptsA.append([pairs[i][0][0], pairs[i][0][1]])
+            ptsB.append([pairs[i][1][0], pairs[i][1][1]])
+        ptsA = np.float32(ptsA)
+        ptsB = np.float32(ptsB)
+        M = cv2.getAffineTransform(ptsA, ptsB)
+        transformation_matrix = mos.compute_affine_parameters(imageA, imageB, pairs)
+        print("M:\n", M)
+        print("trans matrix:\n", transformation_matrix)
+        dsize = (np.size(imageA, 1), np.size(imageA, 0))
+        transformed = cv2.warpAffine(imageB, transformation_matrix, dsize=dsize)
+        cv2.imshow('imageB', imageB)
+        cv2.imshow('transformedB', transformed)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
     unittest.main()

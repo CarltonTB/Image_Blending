@@ -35,11 +35,18 @@ class ImageBlendingDemo:
             return x, y
 
     def run_blending_demo(self):
-        print("Click any point in the images. A bit mask will be created with\n"
+        print("Click any point in imageA. A bit mask will be created with\n"
               " 1's to the right of the x coordinate where you clicked")
         print("Click on either image and press any key to close the images and continue with blending")
+        # The two images being used for the demo, where imageA is the left image and imageB is the right image
         imageA = cv2.imread('sample_images/apple.jpg')
         imageB = cv2.imread('sample_images/orange.jpg')
+        # imageA = cv2.imread('sample_images/im1_1-2.jpg')
+        # imageB = cv2.imread('sample_images/im1_2-1.jpg')
+        # imageA = cv2.imread('sample_images/im2_3.JPG')
+        # imageB = cv2.imread('sample_images/im2_2-1.JPG')
+        # imageA = cv2.imread('sample_images/im5_1.png')
+        # imageB = cv2.imread('sample_images/im5_2.png')
         cv2.namedWindow("imageA")
         cv2.setMouseCallback("imageA", demoObj.click_a)
         cv2.imshow('imageA', imageA)
@@ -50,6 +57,7 @@ class ImageBlendingDemo:
         levels = input("Enter the number of pyramid levels you want to use for blending (3-10 ideally)\n")
         levels = int(levels)
         x_coord = self.image_a_coordinates[0]
+        print("pixel overlap =", np.size(imageA, 1) - x_coord)
         print("Creating bitmask...")
         bitmask = ib.create_bitmask(np.size(imageA, 0), np.size(imageA, 1), np.size(imageA, 2),
                                     (0, x_coord), np.size(imageA, 0), np.size(imageA, 1)-x_coord)
