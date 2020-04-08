@@ -76,22 +76,39 @@ class ImageBlendingDemo:
         print("Demo Complete")
 
     def run_affine_and_mosaic_demo(self):
-        # imageA = cv2.imread("sample_images/im4_1.png")
-        # imageB = cv2.imread("sample_images/im4_2.png")
-        imageA = cv2.imread("sample_images/mountain_A.jpg")
-        imageB = cv2.imread("sample_images/mountain_B.jpg")
-        print("Select 3 pairs of corresponding points in the images in alternating order by first clicking \n" 
-              "on the left image, then clicking on its corresponding point in the right image. Repeat twice more.")
-        pairs = mos.select_control_points(imageA, imageB, 3)
+        imageA = cv2.imread("sample_images/im4_1.png")
+        imageB = cv2.imread("sample_images/im4_2.png")
+        # imageA = cv2.imread("sample_images/mountain_A.jpg")
+        # imageB = cv2.imread("sample_images/mountain_B.jpg")
+        # imageA = cv2.imread("sample_images/im3_1.JPG")
+        # imageB = cv2.imread("sample_images/im3_2-1.JPG")
+        # imageA = cv2.imread("sample_images/im6_1.png")
+        # imageB = cv2.imread("sample_images/im6_2.png")
+        print("Select 4 pairs of corresponding points in the images in alternating order by first clicking \n" 
+              "on the left image, then clicking on its corresponding point in the right image. Repeat thrice more.")
+        print("The first 3 point correspondences will be used for solving for affine params normally, \n "
+              "and all 4 will be used For estimating the params from an over-constrained system")
+        pairs = mos.select_control_points(imageA, imageB, 4)
         # the below points are used for the horse pictures
         # pairs = [((548.1038961038961, 511.1428571428571), (9.681818181818244, 512.0714285714284)),
         #          ((573.1753246753246, 451.71428571428555), (30.110389610389802, 450.7857142857142)),
         #          ((562.961038961039, 370.92857142857133), (20.82467532467558, 370.0))]
-        print(pairs)
+        over_constrained_pairs = pairs
+        pairs = pairs[:3]
+
+        # Normal: three points
+        print("Point correspondences:\n", pairs)
         inverse_transformation_matrix = mos.compute_affine_parameters(imageA, imageB, pairs)
         transformation_matrix = mos.compute_affine_parameters(imageA, imageB, mos.swap_correspondence_order(pairs))
-        print("affine params:\n", inverse_transformation_matrix)
-        print("inverse affine params:\n", transformation_matrix)
+        print("affine params:\n", transformation_matrix)
+        print("inverse affine params:\n", inverse_transformation_matrix)
+        # Over-constrained: 4 points
+        print("Over-constrained point correspondences:\n", over_constrained_pairs)
+        over_constrained_inverse_transformation_matrix = mos.compute_affine_parameters(imageA, imageB, over_constrained_pairs)
+        over_constrained_transformation_matrix = mos.compute_affine_parameters(imageA, imageB, mos.swap_correspondence_order(over_constrained_pairs))
+        print("Over-constrained affine params:\n", over_constrained_transformation_matrix)
+        print("Over-constrained inverse affine params:\n", over_constrained_inverse_transformation_matrix)
+
         transformedB = mos.applying_affine_transformation(imageB, transformation_matrix)
         cv2.imshow('imageB', imageB)
         cv2.imshow('transformedB', transformedB)

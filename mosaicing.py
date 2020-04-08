@@ -78,7 +78,15 @@ def mosiac_with_affine_transformed(IA, transformedB, points, transformation_matr
 
     pixel_overlap = (np.size(left_image, 1) - int(np.rint(min_A))) + int(np.rint(max_B))
     new_image_width = np.size(left_image, 1) + np.size(right_image, 1) - pixel_overlap
-    assert(np.size(left_image, 0) == np.size(right_image, 0))
+    # If the images aren't of the same height, pad to match them
+    if np.size(left_image, 0) != np.size(right_image, 0):
+        difference = abs(np.size(right_image, 0) - np.size(left_image, 0))
+        if ty > 0:
+            left_image = ib.apply_padding(left_image, difference, 0, apply_left=False, apply_right=False,
+                                          apply_top=False)
+        else:
+            left_image = ib.apply_padding(left_image, difference, 0, apply_left=False, apply_right=False,
+                                          apply_bottom=False)
     new_image_height = np.size(right_image, 0)
     result = np.zeros((new_image_height, new_image_width, 3))
     result[:, :np.size(left_image, 1)] = left_image
@@ -90,6 +98,7 @@ def mosiac_with_affine_transformed(IA, transformedB, points, transformation_matr
             if not comparison.all():
                 result[i, j] = right_image[i, k]
             k += 1
+    print("pixel overlap =", pixel_overlap)
     return result.astype(np.uint8)
 
 
