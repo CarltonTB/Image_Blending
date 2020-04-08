@@ -2,6 +2,7 @@
 import cv2
 import numpy as np
 import image_blending as ib
+import mosaicing as mos
 
 
 class ImageBlendingDemo:
@@ -74,6 +75,30 @@ class ImageBlendingDemo:
         cv2.destroyAllWindows()
         print("Demo Complete")
 
+    def run_affine_and_mosaic_demo(self):
+        imageA = cv2.imread("sample_images/im4_1.png")
+        imageB = cv2.imread("sample_images/im4_2.png")
+        print("Select 3 pairs of corresponding points in the images in alternating order by first clicking \n" 
+              "on the left image, then clicking on its corresponding point in the right image. Repeat twice more.")
+        # pairs = mos.select_control_points(imageA, imageB)
+        pairs = [((548.1038961038961, 511.1428571428571), (9.681818181818244, 512.0714285714284)),
+                 ((573.1753246753246, 451.71428571428555), (30.110389610389802, 450.7857142857142)),
+                 ((562.961038961039, 370.92857142857133), (20.82467532467558, 370.0))]
+        print(pairs)
+        inverse_transformation_matrix = mos.compute_affine_parameters(imageA, imageB, pairs)
+        transformation_matrix = mos.compute_affine_parameters(imageA, imageB, mos.swap_correspondence_order(pairs))
+        print("affine params:\n", inverse_transformation_matrix)
+        print("inverse affine params:\n", transformation_matrix)
+        transformedB = mos.applying_affine_transformation(imageB, transformation_matrix)
+        cv2.imshow('imageB', imageB)
+        cv2.imshow('transformedB', transformedB)
+        cv2.imshow('imageA', imageA)
+        result = mos.mosiac_with_affine_transformed(imageA, transformedB, pairs, transformation_matrix, 2)
+        cv2.imshow('result', result)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        print("Demo Complete")
+
     def run_gaussian_pyramid_demo(self):
         demo_image = cv2.imread('sample_images/im1_1-2.JPG')
         levels = input("Enter the number of Gaussian pyramid levels you want (3-10 ideally)\n")
@@ -113,10 +138,9 @@ class ImageBlendingDemo:
         cv2.imshow("original", original_image)
         cv2.imshow("reconstructed", np.rint(reconstructed).astype(np.uint8))
         # Reconstruction error
-        # TODO: figure out why this is zero
         oi = original_image.astype(np.float32)
         rec = reconstructed.astype(np.float32)
-        print(oi-rec)
+        print("reconstruction error: ", oi-rec)
         total_reconstruction_error = np.sum(((oi-rec)**2)**(1/2))
         print("Total reconstruction error: " + str(total_reconstruction_error))
         print("Click on either image and press any key to close the images and end the demo")
@@ -131,7 +155,8 @@ if __name__ == "__main__":
                    "1) Image blending\n"
                    "2) Gaussian pyramid\n"
                    "3) Laplacian pyramid\n"
-                   "4) Image reconstruction\n")
+                   "4) Image reconstruction\n"
+                   "5) Affine unwarping and mosaicing\n")
     if choice == "1":
         demoObj.run_blending_demo()
     elif choice == "2":
@@ -140,3 +165,5 @@ if __name__ == "__main__":
         demoObj.run_laplacian_pyramid_demo()
     elif choice == "4":
         demoObj.run_reconstruction_demo()
+    elif choice == "5":
+        demoObj.run_affine_and_mosaic_demo()

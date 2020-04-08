@@ -195,7 +195,6 @@ def create_blended_pyramid(IA, IB, bitmask, n):
     # Laplacian pyramid of image 2
     LB = laplacian_pyramid(IB, n)
     # Gaussian pyramid of the bitmask
-    # TODO: allow user to select only x coordinate from which to form blending regions
     GS = gaussian_pyramid(bitmask, n)
     Lout = [None]*n
     for i in range(0, n):
@@ -257,7 +256,7 @@ def match_dimensions(desired_dimensions, I):
     return result
 
 
-def apply_padding(I, padding_height, padding_width, apply_left=True, apply_right=True):
+def apply_padding(I, padding_height, padding_width, apply_left=True, apply_right=True, apply_top=True, apply_bottom=True):
     """
     Helper function that applies zero-padding
     I is an image of varying size
@@ -276,8 +275,10 @@ def apply_padding(I, padding_height, padding_width, apply_left=True, apply_right
     zero_column = np.array([[[0]*image_channels]]*(image_height+padding_height*2), dtype=np.float32)
     result = np.copy(I)
     for i in range(0, padding_height):
-        result = np.concatenate((zero_row, result), axis=0)
-        result = np.concatenate((result, zero_row), axis=0)
+        if apply_top:
+            result = np.concatenate((zero_row, result), axis=0)
+        if apply_bottom:
+            result = np.concatenate((result, zero_row), axis=0)
     for j in range(0, padding_width):
         if apply_left:
             result = np.concatenate((zero_column, result), axis=1)
