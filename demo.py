@@ -76,14 +76,17 @@ class ImageBlendingDemo:
         print("Demo Complete")
 
     def run_affine_and_mosaic_demo(self):
-        imageA = cv2.imread("sample_images/im4_1.png")
-        imageB = cv2.imread("sample_images/im4_2.png")
+        # imageA = cv2.imread("sample_images/im4_1.png")
+        # imageB = cv2.imread("sample_images/im4_2.png")
+        imageA = cv2.imread("sample_images/mountain_A.jpg")
+        imageB = cv2.imread("sample_images/mountain_B.jpg")
         print("Select 3 pairs of corresponding points in the images in alternating order by first clicking \n" 
               "on the left image, then clicking on its corresponding point in the right image. Repeat twice more.")
-        # pairs = mos.select_control_points(imageA, imageB)
-        pairs = [((548.1038961038961, 511.1428571428571), (9.681818181818244, 512.0714285714284)),
-                 ((573.1753246753246, 451.71428571428555), (30.110389610389802, 450.7857142857142)),
-                 ((562.961038961039, 370.92857142857133), (20.82467532467558, 370.0))]
+        pairs = mos.select_control_points(imageA, imageB, 3)
+        # the below points are used for the horse pictures
+        # pairs = [((548.1038961038961, 511.1428571428571), (9.681818181818244, 512.0714285714284)),
+        #          ((573.1753246753246, 451.71428571428555), (30.110389610389802, 450.7857142857142)),
+        #          ((562.961038961039, 370.92857142857133), (20.82467532467558, 370.0))]
         print(pairs)
         inverse_transformation_matrix = mos.compute_affine_parameters(imageA, imageB, pairs)
         transformation_matrix = mos.compute_affine_parameters(imageA, imageB, mos.swap_correspondence_order(pairs))
@@ -95,6 +98,7 @@ class ImageBlendingDemo:
         cv2.imshow('imageA', imageA)
         result = mos.mosiac_with_affine_transformed(imageA, transformedB, pairs, transformation_matrix, 2)
         cv2.imshow('result', result)
+        print("Click on either image and press any key to close the images and end the demo")
         cv2.waitKey(0)
         cv2.destroyAllWindows()
         print("Demo Complete")

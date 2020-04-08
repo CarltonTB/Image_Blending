@@ -4,12 +4,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 import math
 
+
 # Note: This code deals with everything as datatype np.float32 while doing any operations
 # images are converted to np.uint8 before being passed to the opencv imshow function
-
-# TODO: make blending work for just an overlapping region selected by mouse
-
-
 def convolve(I, H):
     """
     I is an image of varying size
